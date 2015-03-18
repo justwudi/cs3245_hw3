@@ -18,7 +18,7 @@ UNIVERSAL_SET_KEY = '.'
 
 def main():
     parser = argparse.ArgumentParser(
-        prog='CS3245 HW2', description='CS3245 HW2')
+        prog='CS3245 HW3', description='CS3245 HW3')
     parser.add_argument('-i', required=True, help='directory-of-documents')
     parser.add_argument('-d', required=True, help='dictionary-file')
     parser.add_argument('-p', required=True, help='postings-file')
