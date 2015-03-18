@@ -31,11 +31,14 @@ def main():
     query_file_name = args.q
     output_file_name = args.o
 
-    execute_queries(
-        dictionary_file_name, postings_file_name, query_file_name, output_file_name)
+    execute_queries(dictionary_file_name, postings_file_name,
+                    query_file_name, output_file_name)
 
 
-def execute_queries(dictionary_file_name='dictionary.txt', postings_file_name='postings.txt', query_file_name='query.txt', output_file_name='output.txt'):
+def execute_queries(dictionary_file_name='dictionary.txt',
+                    postings_file_name='postings.txt',
+                    query_file_name='query.txt',
+                    output_file_name='output.txt'):
     with open(dictionary_file_name, 'r') as dictionary_file:
         global ptr_dictionary
         ptr_dictionary = pickle.load(dictionary_file)
@@ -117,12 +120,14 @@ def intersect(list_a, list_b, negate_a=False, negate_b=False):
                 # 1. Index divides sqrt_b
                 # 2. Index + sqrt_b is not out of bounds
                 # 3. a > skip_successor(b)
-                if j % sqrt_b == 0 and j + sqrt_b < len(list_b) and list_a[i] >= list_b[j + sqrt_b]:
+                if j % sqrt_b == 0 and j + sqrt_b < len(list_b) and\
+                   list_a[i] >= list_b[j + sqrt_b]:
                     j += sqrt_b
                 else:
                     j += 1
             else:
-                if i % sqrt_a == 0 and i + sqrt_a < len(list_a) and list_a[i + sqrt_a] <= list_b[j]:
+                if i % sqrt_a == 0 and i + sqrt_a < len(list_a) and\
+                   list_a[i + sqrt_a] <= list_b[j]:
                     i += sqrt_a
                 else:
                     i += 1
@@ -179,7 +184,7 @@ def toRPN(query):
     """
     Converts the query string into reverse polish notation (rpn)
     """
-     # "Spread" the parentheses and replace NOT NOT with empty string.
+    # "Spread" the parentheses and replace NOT NOT with empty string.
     words = query.replace('(', ' ( ').replace(')', ' ) ').replace(
         'NOT NOT', '').split()
 
@@ -191,7 +196,8 @@ def toRPN(query):
             operator_stack.append('(')
 
         elif word == ')':  # Pop everything until a ) is found, then pop ).
-            while len(operator_stack) != 0 and operator_stack[len(operator_stack) - 1] != '(':
+            while len(operator_stack) != 0 and\
+                  operator_stack[len(operator_stack) - 1] != '(':
                 rpn.append(operator_stack.pop())
 
             if operator_stack[len(operator_stack) - 1] == '(':
@@ -201,14 +207,17 @@ def toRPN(query):
             operator_stack.append('NOT')
 
         elif word == 'AND':  # Pop all NOTs before appending to operator stack.
-            while len(operator_stack) != 0 and operator_stack[len(operator_stack) - 1] == 'NOT':
+            while len(operator_stack) != 0 and\
+                  operator_stack[len(operator_stack) - 1] == 'NOT':
                 rpn.append(operator_stack.pop())
 
             operator_stack.append('AND')
 
         # Pop all NOTs and ANDs before appending to operator stack.
         elif word == 'OR':
-            while len(operator_stack) != 0 and (operator_stack[len(operator_stack) - 1] == 'NOT' or operator_stack[len(operator_stack) - 1] == 'AND'):
+            while len(operator_stack) != 0 and\
+                  (operator_stack[len(operator_stack) - 1] == 'NOT' or
+                   operator_stack[len(operator_stack) - 1] == 'AND'):
                 rpn.append(operator_stack.pop())
 
             operator_stack.append('OR')
@@ -225,7 +234,8 @@ def toRPN(query):
 
 def apply_RPN(rpn):
     """
-    Applies and runs through the reverse polish notation (rpn) to obtain desired result.
+    Applies and runs through the reverse polish notation (rpn) to obtain
+    desired result.
     """
     # Clears the intermediate results, in case of conflicts.
     global results
@@ -301,7 +311,8 @@ def apply_RPN(rpn):
 
 def get_postings_list(term):
     """
-    Retrieves the postings list for the term if it is not already in memory, and returns it.
+    Retrieves the postings list for the term if it is not already in memory,
+    and returns it.
     """
     if term in results:
         return results[term]
@@ -317,11 +328,15 @@ def read_postings_list(term):
     if term not in ptr_dictionary:
         return []
 
-    start_ptr, end_ptr = ptr_dictionary[term] # Retrieve the start and end pointers,
+    # Retrieve the start and end pointers,
+    start_ptr, end_ptr = ptr_dictionary[term]
 
-    postings_file.seek(start_ptr) # Position at start pointer in the postings file,
-    postings_list_pickle = postings_file.read(end_ptr - start_ptr) # Retrieve the pickle data,
-    postings_list = pickle.loads(postings_list_pickle) # Un-pickle the data.
+    # Position at start pointer in the postings file
+    postings_file.seek(start_ptr)
+    # Retrieve the pickle data
+    postings_list_pickle = postings_file.read(end_ptr - start_ptr)
+    # Un-pickle the data
+    postings_list = pickle.loads(postings_list_pickle)
 
     return postings_list
 
