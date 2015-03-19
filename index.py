@@ -77,30 +77,27 @@ def build_index(directory_path='/Users/WD/nltk_data/corpora/reuters/training/',
                 for term in terms:
                     postings_lists[term][int(doc_file_name)] += 1
 
-    N = len(postings_lists[UNIVERSAL_SET_KEY])
-
-    sum_of_squares_tf_idf = defaultdict(lambda: 0)
+    sum_of_squares_tf = defaultdict(lambda: 0)
 
     # Calculates the tf_idf for each term, keeps track of the sum of tf_idf
     # squares to be used to calculate the doc length
     for key, postings_list in postings_lists.iteritems():
         if key is not UNIVERSAL_SET_KEY:
-            df = len(postings_list)
             for doc_id, tf in postings_list.iteritems():
-                tf_idf = tf_wt(tf) * log(N/df)
-                postings_list[doc_id] = tf_idf
-                sum_of_squares_tf_idf[doc_id] += tf_idf**2
+                tf = tf_wt(tf)
+                postings_list[doc_id] = tf
+                sum_of_squares_tf[doc_id] += tf**2
 
     # Calculates the doc length for each document to be used for normalizing
     doc_length = {}
-    for doc_id, square_doc_length in sum_of_squares_tf_idf.iteritems():
+    for doc_id, square_doc_length in sum_of_squares_tf.iteritems():
         doc_length[doc_id] = math.sqrt(square_doc_length)
 
     # Normalizes the tf_idf for each term
     for key, postings_list in postings_lists.iteritems():
         if key is not UNIVERSAL_SET_KEY:
-            for doc_id, tf_idf in postings_list.iteritems():
-                postings_list[doc_id] = tf_idf/doc_length[doc_id]
+            for doc_id, tf in postings_list.iteritems():
+                postings_list[doc_id] = tf/doc_length[doc_id]
 
     # Stores start/end pointers to postings list within postings file
     # To be written to the dictionary file
