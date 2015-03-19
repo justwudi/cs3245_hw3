@@ -72,15 +72,22 @@ def execute_queries(dictionary_file_name='dictionary.txt',
 
 
 def rankedSearch(N, query_terms):
+    """Compute the rank score for each document"""
+
     result = defaultdict(lambda: 0)
+
+    # Get the occurance of each word in the query
     query_frequency = dict(Counter(query_terms))
 
+    # Calculate the tf for each query term
     q_scores = defaultdict(lambda: 0)
     for term, freq in query_frequency.iteritems():
         q_scores[term] = tf_wt(freq)
 
+    # This part of the code compute the vector score for each document
     normalise_factor = 0
     for term in query_terms:
+        # Read the posting dictionary from the file
         postings = read_postings_dict(str.strip(str(term)))
         df = len(postings)
 
@@ -88,12 +95,16 @@ def rankedSearch(N, query_terms):
             idf = 0
         else:
             idf = log(N/df)
+
+        # Calculate the weight of each query
         query_weight = idf * q_scores[term]
         normalise_factor += query_weight ** 2
 
+        # Compute the cumulative score for each document
         for doc_id, score in postings.iteritems():
             result[doc_id] += score * query_weight
 
+    # Normalise the score
     normalise_factor = math.sqrt(normalise_factor)
     for doc_id in result:
         result[doc_id] /= normalise_factor
@@ -103,6 +114,7 @@ def rankedSearch(N, query_terms):
 
 
 def read_postings_dict(term):
+    """Read dictionary from the file"""
     if term not in ptr_dictionary:
         return {}
 
