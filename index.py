@@ -31,6 +31,13 @@ def main():
     build_index(directory_path, dictionary_file_name, postings_file_name)
 
 
+def tf_wt(tf):
+    if tf is 0:
+        return tf
+    else:
+        return 1 + log(tf)
+
+
 def log(x):
     if x is 0:
         return 0
@@ -78,7 +85,7 @@ def build_index(directory_path='/Users/WD/nltk_data/corpora/reuters/training/',
         if key is not UNIVERSAL_SET_KEY:
             df = len(postings_list)
             for doc_id, tf in postings_list.iteritems():
-                postings_list[doc_id] = (1 + log(tf)) * log(N/df)
+                postings_list[doc_id] = tf_wt(tf) * log(N/df)
 
     # Stores postings lists
     with open(postings_file_name, 'w') as postings_file:
