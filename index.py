@@ -81,11 +81,24 @@ def build_index(directory_path='/Users/WD/nltk_data/corpora/reuters/training/',
 
     N = len(postings_lists[UNIVERSAL_SET_KEY])
 
+    sum_of_squares_tf_idf = defaultdict(lambda: 0)
+
     for key, postings_list in postings_lists.iteritems():
         if key is not UNIVERSAL_SET_KEY:
             df = len(postings_list)
             for doc_id, tf in postings_list.iteritems():
-                postings_list[doc_id] = tf_wt(tf) * log(N/df)
+                tf_idf = tf_wt(tf) * log(N/df)
+                postings_list[doc_id] = tf_idf
+                sum_of_squares_tf_idf[doc_id] += tf_idf**2
+
+    doc_length = {}
+    for doc_id, square_doc_length in sum_of_squares_tf_idf.iteritems():
+        doc_length[doc_id] = math.sqrt(square_doc_length)
+
+    for key, postings_list in postings_lists.iteritems():
+        if key is not UNIVERSAL_SET_KEY:
+            for doc_id, tf in postings_list.iteritems():
+                postings_list[doc_id] = tf/doc_length[doc_id]
 
     # Stores postings lists
     with open(postings_file_name, 'w') as postings_file:
