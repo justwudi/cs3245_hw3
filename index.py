@@ -119,7 +119,7 @@ def normalise_postings_lists(postings_lists):
     for doc_id, square_doc_length in sum_of_squares_tf.iteritems():
         doc_length[doc_id] = math.sqrt(square_doc_length)
 
-    # Normalizes the tf_idf for each term
+    # Normalizes the tf for each term
     for key, postings_list in postings_lists.iteritems():
         if key is not UNIVERSAL_SET_KEY:
             for doc_id, tf in postings_list.iteritems():
