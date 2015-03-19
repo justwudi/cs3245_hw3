@@ -90,11 +90,7 @@ def rankedSearch(N, query_terms):
         # Read the posting dictionary from the file
         postings = read_postings_dict(str.strip(str(term)))
         df = len(postings)
-
-        if not df:
-            idf = 0
-        else:
-            idf = log(N/df)
+        idf = get_idf(N, df)
 
         # Calculate the weight of each query
         query_weight = idf * q_scores[term]
@@ -111,6 +107,13 @@ def rankedSearch(N, query_terms):
 
     return [item[0] for item in sorted(result.items(),
             key=operator.itemgetter(1), reverse=True)]
+
+
+def get_idf(N, df):
+    if not df:
+        return 0
+    else:
+        return log(N/df)
 
 
 def read_postings_dict(term):
