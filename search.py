@@ -1,10 +1,13 @@
+from __future__ import division
+
 import argparse
 import math
 import nltk
 import pickle
 import string
 import operator
-from collections import defaultdict
+from collections import defaultdict, Counter
+from index import tf_wt, log
 
 PUNCTUATION = set(string.punctuation)
 UNIVERSAL_SET_KEY = '.'
@@ -54,11 +57,12 @@ def execute_queries(dictionary_file_name='dictionary.txt',
     query_file = open(query_file_name, 'r')
     output_file = open(output_file_name, 'w')
 
+    N = len(read_postings_dict(UNIVERSAL_SET_KEY))
+
     for line in query_file:
         query_terms = nltk.word_tokenize(line)
         query_terms = map(lambda t: stemmer.stem(str(t).lower()), query_terms)
-        result = rankedSearch(query_terms)
-        # print(result[:10])
+        result = rankedSearch(N, query_terms)
         output_file.write(' '.join(str(doc_id) for doc_id in result[:10]))
         output_file.write('\n')
 
@@ -67,16 +71,33 @@ def execute_queries(dictionary_file_name='dictionary.txt',
     postings_file.close()
 
 
-def rankedSearch(query_terms):
+def rankedSearch(N, query_terms):
     result = defaultdict(lambda: 0)
+    query_frequency = dict(Counter(query_terms))
 
+    q_scores = defaultdict(lambda: 0)
+    for term, freq in query_frequency.iteritems():
+        q_scores[term] = tf_wt(freq)
+
+    normalise_factor = 0
     for term in query_terms:
         postings = read_postings_dict(str.strip(str(term)))
+        df = len(postings)
+
+        if not df:
+            idf = 0
+        else:
+            idf = log(N/df)
+        query_weight = idf * q_scores[term]
+        normalise_factor += query_weight ** 2
 
         for doc_id, score in postings.iteritems():
-            result[doc_id] += score
+            result[doc_id] += score * query_weight
 
-    # return sorted(result.items(), key=operator.itemgetter(1), reverse=True)
+    normalise_factor = math.sqrt(normalise_factor)
+    for doc_id in result:
+        result[doc_id] /= normalise_factor
+
     return [item[0] for item in sorted(result.items(),
             key=operator.itemgetter(1), reverse=True)]
 
