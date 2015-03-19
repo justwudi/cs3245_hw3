@@ -55,12 +55,12 @@ def execute_queries(dictionary_file_name='dictionary.txt',
     output_file = open(output_file_name, 'w')
 
     for line in query_file:
-        query_terms = line.split(' ')
-        query_terms = map(lambda t: stemmer.stem(t.lower()), query_terms)
+        query_terms = nltk.word_tokenize(line)
+        query_terms = map(lambda t: stemmer.stem(str(t).lower()), query_terms)
         result = rankedSearch(query_terms)
         # print(result[:10])
-        # output_file.write(' '.join(str(doc_id) for doc_id in result[:10]))
-        # output_file.write('\n')
+        output_file.write(' '.join(str(doc_id) for doc_id in result[:10]))
+        output_file.write('\n')
 
     output_file.close()
     query_file.close()
@@ -69,9 +69,9 @@ def execute_queries(dictionary_file_name='dictionary.txt',
 
 def rankedSearch(query_terms):
     result = defaultdict(lambda: 0)
-    print(query_terms)
+
     for term in query_terms:
-        postings = read_postings_dict(term)
+        postings = read_postings_dict(str.strip(str(term)))
 
         for doc_id, score in postings.iteritems():
             result[doc_id] += score

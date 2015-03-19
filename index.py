@@ -60,7 +60,7 @@ def build_index(directory_path='/Users/WD/nltk_data/corpora/reuters/training/',
 
             for line in doc:
                 tokens = nltk.word_tokenize(line)
-                tokens = map(lambda t: stemmer.stem(t.lower()), tokens)
+                tokens = map(lambda t: stemmer.stem(str(t).lower()), tokens)
                 # filter out punctuations
                 terms = filter(lambda t: t not in PUNCTUATION and
                                t not in stopwords, tokens)
