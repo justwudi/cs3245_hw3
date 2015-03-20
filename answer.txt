@@ -1,0 +1,15 @@
+1) 
+
+2) The score is determine by the term-weight, query-term-weight and idf. 
+
+For the term weight, if we have long documents, it is likely that each individual term weight will be smaller as compare to a short documents, since the N that is use to normalize the weight will be much larger than a short document.
+
+For query-term-weight, a longer query term will also decrease the individual weight of each query term.
+
+Lastly for idf, this is a constant value regardless of whether there is long document or short document or queries, thus it will be similar for both long and short cases.
+
+With these factor, a long document with a long query will produce a set of results that have very similar score to each other, thus making it harder to differentiate the best result from each other. Whereas for short query and short document, the result produce will like be more accurate.
+
+3) Field parametric depends on the consistency of the fields among the documents in order to be useful. Given that Reuters collection do not have a uniform quality for its meta data, it is unlikely that they have consistent field parametric for each document. Thus, parametric indices will not be useful for practical search in the Reuters collection.
+
+Since each Reuter documents actually contains a minimun of titles and its content zone. Making use of this two information will certainly be able to provide more context for the search engine than those which is not using zone at all. Thus, zone would be useful for practical search in Reuters collection.
