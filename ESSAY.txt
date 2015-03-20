@@ -1,61 +1,61 @@
-1) To support phrasal queries, the dictionary used cannot simply map a single
-term to a postings list. We will need at least 2 terms.
+1) To support phrasal queries, each document in the postings list will have to 
+store the positions of where the terms appear in that document.
 
-For example, we could use biword for our dictionary. After tokenizing and 
-stemming, instead of appending the document to each terms' postings list, we 
-will build our dictionary with every 2 consecutive terms and append the 
-document to each one of them. We also need to store the position of the 2 terms
-along with the document so that we can verify that it is part of the phrase
-when querying.
-
-Document: the quick brown fox jumps over the lazy dog
-Tokenize: ['the', 'quick', 'brown', 'fox', 'jumps', 'over', 'the', 'lazy', 'dog']
-Stem: ['the', 'quick', 'brown', 'fox', 'jump', 'over', 'the', 'lazi', 'dog']
+Document: to be or not to be
+Tokenize and stem: ['to', 'be', 'or', 'not', 'to', 'be']
 
 Dictionary:
 {
-    ['', 'the']:        [(document, 0)],
-    ['the', 'quick']:   [(document, 1)],
-    ['quick', 'brown']: [(document, 2)],
-    ['brown', 'fox']:   [(document, 3)],
-    ['fox', 'jumps']:   [(document, 4)],
-    ['jumps', 'over']:  [(document, 5)],
-    ['over', 'the']:    [(document, 6)],
-    ['the', 'lazy']:    [(document, 7)],
-    ['lazy', 'dog']:    [(document, 8)],
-    ['dog', '']:        [(document, 9)]
+    'to':  [(document, [0,4])],
+    'be':  [(document, [1,5])],
+    'or':  [(document, 2)],
+    'not': [(document, 3)]
 }
 
-The queries will have to be by 2 terms as well, so the query will need to be
-transformed to a sequence of [2 terms].
+If we are querying for 'not to be', we will intersect the posting lists based 
+on the same document, and positions 1 from each other. The document will then 
+be appended to the intermediate result, together with the array of ending 
+positions that match the phrase (meaning that the positions are 1 from each 
+other).
 
-We'll assume that we want to match the exact phrase and not partial phrase.
+Intersect 'not' with 'to', when we have the same document in the posting list,
+we will match the position 3 for 'not' and position 4 for 'to', thus the 
+intermediate result will contain 4 and discard 0 to give [(document, [4])].
 
-We need to keep track of the positions of each query item, querying for the 
-first item is a trivial operation. For the second query item, we will have to 
-intersect the results by not only the same document, but the positions must 
-also be 1 position apart. This will ensure that we can match the phrase and not
-two separate [2 terms] that are not connected together.
+Following this logic, the final result will contain (document, [5]) and thus we
+will return document.
+
+However if we are searching for 'or to be', the search will end at the 
+intersection between 'or' and 'to' since there are no continuous positions for 
+both words.
 
 
-2) The score is determine by the term-weight, query-term-weight and idf. 
+2) Longer documents will have more diversity, thus will contain more terms and 
+have higher tf values. These will raise the scores of longer documents as 
+compared to a shorter document. For longer queries, due to the increase in the 
+number of query items, a larger set of results will be returned mainly because 
+we are doing union of the postings list for each query item. However if we are 
+just comparing between the results of long document and long queries, since all 
+documents are long, the tf is relative and will still produce relevant results. 
+As for the longer queries, documents will have to match a higher number of 
+query items in order to obtain a higher score. Thus the results obtained will 
+be as relevant as compared to short document and short queries.
 
-For the term weight, if we have long documents, it is likely that each 
-individual term weight will be smaller as compare to a short documents, since 
-the document length that is use to normalize the weight will be much larger 
-than a short document.
+The normalization process that we are using will not be sufficient to address 
+for the problem of the different in length of documents. The normalization 
+process elminiated the information on the length of the origianl document, and 
+thus we will treat long and short document on equal grounds despite the fact 
+that longer document will produce a heigher weight. However, following the 
+dicussion before this, if we are always comparing between long document or 
+short document, the effect will not be as obvious.
 
-For query-term-weight, a longer query term will also decrease the individual 
-weight of each query term.
+In my judgement, the ltc.inc scheme is sufficient to retrieve the result from 
+the reuter sets as most of the data are relatively short and similar length. 
+Thus the length of the document will not affect the result much.
 
-Lastly for idf, this is a constant value regardless of whether there is long 
-document or short document or queries, thus it will be similar for both long 
-and short cases.
-
-With these factor, a long document with a long query will produce a set of 
-results that have very similar score to each other, thus making it harder to 
-differentiate the best result from each other. Whereas for short query and 
-short document, the result produce will like be more accurate.
+For short document with short query, each term will contribute a larger score, 
+and it is less likely for a irrelavant document to hit upon a search query. 
+Thus, the result returns will be much more relavant.
 
 
 3) Field parametric depends on the consistency of the fields among the 
