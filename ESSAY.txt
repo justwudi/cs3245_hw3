@@ -53,14 +53,14 @@ For short document with short query, each term will contribute a larger score,
 and it is less likely for a irrelavant document to hit upon a search query. 
 Thus, the result returns will be much more relavant.
 
-In my judgement, the ltc.inc scheme is sufficient to retrieve the result from 
-the reuter sets as most of the data are relatively short and similar length. 
-Thus the length of the document will not affect the result much.
+Assumption: ltc.lnc calculate use N(number of queries) and df(number of query which contain the term) (Since the alternative will not change anything)
 
-======
-Assumption: ltc.lnc calculate use N(number of queries) and df(number of query which contain the term)
-In my judgement, the ltc.lnc scheme should be sufficient to retrieve the result from the reuter sets. Since the set of queries is probably not large, there will not be much benefit from the idf calculate from the queries. However, it should be enough to still get relavant result despite not calculating idf since the term in reuters set are relatively distinct and unique. 
-=====
+In my judgement, the ltc.lnc scheme should be sufficient to retrieve the
+result from the reuter sets. Since the set of queries is probably not large,
+there will not be much benefit from the idf calculate from the queries.
+However, it should be enough to still get relavant result despite not
+calculating idf since the term in reuters set are relatively distinct and
+unique. 
 
 3) Field parametric depends on the consistency of the fields among the 
 documents in order to be useful. Given that Reuters collection do not have a 
